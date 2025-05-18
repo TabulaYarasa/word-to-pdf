@@ -8,6 +8,7 @@ const PizZip = require("pizzip");
 const Docxtemplater = require("docxtemplater");
 const libre = require("libreoffice-convert");
 const libreConvert = promisify(libre.convert);
+const cron = require("node-cron");
 
 // Express uygulamasını oluştur
 const app = express();
@@ -41,6 +42,52 @@ const convertedPdfs = new Map();
 function generatePdfId() {
   return Date.now() + "-" + Math.random().toString(36).substring(2, 15);
 }
+
+function cleanupOldFiles() {
+  console.log("clenup başladı");
+  const outputDir = path.join(__dirname, "outputs");
+  fs.readdir(outputDir, (err, files) => {
+    if (err) {
+      console.error("Klasör okunamadı:", err);
+      return;
+    }
+
+    const now = Date.now();
+    files.forEach((file) => {
+      // .gitkeep dosyasını atla
+
+      if (file === ".gitkeep") return;
+
+      const filePath = path.join(outputDir, file);
+      fs.stat(filePath, (err, stats) => {
+        console.log("file path okundu");
+        if (err) {
+          console.error(`Dosya durumu okunamadı: ${file}`, err);
+          return;
+        }
+
+        // 1 saatten eski dosyaları temizle (3600000 ms)
+        const fileAge = now - stats.mtimeMs;
+        if (fileAge > 1000000) {
+          fs.unlink(filePath, (err) => {
+            if (err) {
+              console.error(`Dosya silinemedi: ${file}`, err);
+            } else {
+              console.log(`Eski dosya temizlendi: ${file}`);
+            }
+          });
+        }
+      });
+    });
+  });
+}
+
+// Her saat başı temizlik yap
+setInterval(cleanupOldFiles, 1000000); // 1 saat
+
+// Başlangıçta da bir temizlik yap
+cleanupOldFiles();
+
 // Ana sayfa endpoint'i
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
