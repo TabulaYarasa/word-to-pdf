@@ -108,8 +108,11 @@ app.post("/convert-word2pdf", upload.single("file"), async (req, res) => {
     // DOCX buffer'ını oku
     const docxBuffer = fs.readFileSync(inputPath);
 
-    // PDF'e dönüştür
-    const pdfBuffer = await libreConvert(docxBuffer, ".pdf", undefined);
+    // PDF'e dönüştür (yüksek kalite ayarları ile)
+    // LibreOffice filter parametresi: writer_pdf_Export ile özel ayarlar
+    const filter =
+      'writer_pdf_Export:{"SelectPdfVersion":1,"Quality":100,"MaxImageResolution":1200,"ReduceImageResolution":false}';
+    const pdfBuffer = await libreConvert(docxBuffer, ".pdf", filter);
 
     // Dosyayı kaydet
     fs.writeFileSync(outputPath, pdfBuffer);
@@ -303,8 +306,11 @@ app.post("/generate-pdf", upload.single("template"), async (req, res) => {
     console.log("Doldurulmuş DOCX oluşturuldu: ", filledDocxPath);
 
     try {
-      // LibreOffice ile PDF'e dönüştür
-      const pdfBuffer = await libreConvert(filledDocx, ".pdf", undefined);
+      // LibreOffice ile PDF'e dönüştür (yüksek kalite ayarları ile)
+      // LibreOffice filter parametresi: writer_pdf_Export ile özel ayarlar
+      const filter =
+        'writer_pdf_Export:{"SelectPdfVersion":1,"Quality":100,"MaxImageResolution":1200,"ReduceImageResolution":false}';
+      const pdfBuffer = await libreConvert(filledDocx, ".pdf", filter);
 
       // PDF'i kaydet
       fs.writeFileSync(outputPdfPath, pdfBuffer);
@@ -350,8 +356,11 @@ app.post("/convert-pdf", upload.single("document"), async (req, res) => {
     // DOCX buffer'ını oku
     const docxBuffer = fs.readFileSync(inputPath);
 
-    // PDF'e dönüştür
-    const pdfBuffer = await libreConvert(docxBuffer, ".pdf", undefined);
+    // PDF'e dönüştür (yüksek kalite ayarları ile)
+    // LibreOffice filter parametresi: writer_pdf_Export ile özel ayarlar
+    const filter =
+      'writer_pdf_Export:{"SelectPdfVersion":1,"Quality":100,"MaxImageResolution":1200,"ReduceImageResolution":false}';
+    const pdfBuffer = await libreConvert(docxBuffer, ".pdf", filter);
 
     // Dosyayı kaydet
     fs.writeFileSync(outputPath, pdfBuffer);
